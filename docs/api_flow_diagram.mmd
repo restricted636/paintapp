@@ -1,0 +1,21 @@
+flowchart TD
+    A[Flutter / React Native / Web App] --> B[API Server]
+
+    B --> C1[Auth API: /auth/register, /auth/login]
+    B --> C2[Palette API: /palettes, /palettes/public]
+    B --> C3[Color API: /colors, /colors/mix, /colors/target]
+    B --> C4[Image API: /images/pick-color]
+    B --> C5[Like & Clone API: /palettes/:id/like, /palettes/:id/clone]
+    B --> C6[Sync API: /sync]
+
+    C1 --> D[(PostgreSQL Database)]
+    C2 --> D
+    C3 --> D
+    C4 --> D
+    C5 --> D
+    C6 --> D
+
+    A --> E[(Local DB: Isar / Sqflite)]
+    E <--> F[Sync Service]
+    F --> C6
+    D --> G[Public data to clients]

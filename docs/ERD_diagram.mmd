@@ -1,0 +1,71 @@
+erDiagram
+    USERS {
+        int id PK
+        string username
+        string email
+        string password_hash
+        string avatar_url
+        timestamp created_at
+    }
+
+    COLORS {
+        int id PK
+        int user_id FK
+        char(7) hex_code
+        int rgb_r
+        int rgb_g
+        int rgb_b
+        float cmyk_c
+        float cmyk_m
+        float cmyk_y
+        float cmyk_k
+        float lab_l
+        float lab_a
+        float lab_b
+        float h
+        float s
+        float l
+        string name
+        text note
+        timestamp created_at
+    }
+
+    PALETTES {
+        int id PK
+        int user_id FK
+        string name
+        text description
+        boolean is_public
+        text[] tags
+        timestamp created_at
+    }
+
+    PALETTE_COLORS {
+        int id PK
+        int palette_id FK
+        int color_id FK
+        float ratio
+    }
+
+    MIX_RESULTS {
+        int id PK
+        int palette_id FK
+        int result_color_id FK
+        int target_color_id FK
+        float accuracy
+        timestamp created_at
+    }
+
+    LIKES {
+        int id PK
+        int user_id FK
+        int palette_id FK
+    }
+
+    USERS ||--o{ COLORS : "owns"
+    USERS ||--o{ PALETTES : "creates"
+    PALETTES ||--o{ PALETTE_COLORS : "contains"
+    PALETTE_COLORS }o--|| COLORS : "references"
+    PALETTES ||--o{ MIX_RESULTS : "has"
+    USERS ||--o{ LIKES : "likes"
+    PALETTES ||--o{ LIKES : "is liked by"
