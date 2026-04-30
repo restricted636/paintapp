@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from models import Base
+from models.palette_color import palette_colors
 
 
 class Palette(Base):
@@ -17,3 +18,6 @@ class Palette(Base):
 
     # Relationship with User
     user = relationship("User", back_populates="palettes")
+    
+    # Relationship with Color (many-to-many via palette_colors)
+    colors = relationship("Color", secondary=palette_colors, back_populates="palettes")
