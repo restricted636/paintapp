@@ -112,6 +112,94 @@ def list_colors(
     return colors
 
 
+@router.get(
+    "/{color_id}",
+    response_model=ColorResponse,
+    summary="Get a color by ID",
+    description="Retrieve a specific color by its ID. Only the owner can view.",
+    responses={
+        200: {"description": "Color retrieved successfully"},
+        403: {"description": "Not authorized to view this color"},
+        404: {"description": "Color not found"},
+    },
+    tags=["Colors"],
+)
+def get_color(
+    color_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get a single color by ID (only owner can view).
+    
+    - **color_id**: The unique identifier of the color
+    """
+    db_color = db.query(Color).filter(Color.id == color_id).first()
+    
+    if not db_color:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Color not found"
+        )
+    
+    if bool(db_color.user_id != current_user.id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to view this color"
+        )
+    
+    return db_color
+
+
+@router.put(
+    "/{color_id}",
+    response_model=ColorResponse,
+    summary="Update a color",
+    description="Update an existing color. Only the owner can update.",
+    responses={
+        200: {"description": "Color updated successfully"},
+        403: {"description": "Not authorized to update this color"},
+        404: {"description": "Color not found"},
+    },
+    tags=["Colors"],
+)
+def update_color(
+    color_id: int,
+    color: ColorCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Update a color (only owner can update).
+    
+    - **color_id**: The unique identifier of the color
+    - **hex_code**: New hex color code
+    - **rgb_r**, **rgb_g**, **rgb_b**: New RGB values
+    - Other color model values can be updated as needed
+    """
+    db_color = db.query(Color).filter(Color.id == color_id).first()
+    
+    if not db_color:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Color not found"
+        )
+    
+    if bool(db_color.user_id != current_user.id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to update this color"
+        )
+    
+    # Update fields using setattr to avoid type checker issues
+    for attr in ['hex_code', 'rgb_r', 'rgb_g', 'rgb_b', 'cmyk_c', 'cmyk_m', 'cmyk_y', 'cmyk_k', 'lab_l', 'lab_a', 'lab_b', 'h', 's', 'l', 'name', 'note']:
+        setattr(db_color, attr, getattr(color, attr))
+    
+    db.commit()
+    db.refresh(db_color)
+    return db_color
+
+
 @router.delete(
     "/{color_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -142,7 +230,7 @@ def delete_color(
             detail="Color not found"
         )
     
-    if db_color.user_id != current_user.id:
+    if bool(db_color.user_id != current_user.id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to delete this color"

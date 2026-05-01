@@ -158,21 +158,21 @@ def update_palette(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Palette not found"
         )
-    if db_palette.user_id != current_user.id:
+    if bool(db_palette.user_id != current_user.id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to update this palette"
         )
     
-    # Update fields if provided
+    # Update fields if provided using setattr
     if palette.name is not None:
-        db_palette.name = palette.name
+        setattr(db_palette, 'name', palette.name)
     if palette.description is not None:
-        db_palette.description = palette.description
+        setattr(db_palette, 'description', palette.description)
     if palette.is_public is not None:
-        db_palette.is_public = palette.is_public
+        setattr(db_palette, 'is_public', palette.is_public)
     if palette.tags is not None:
-        db_palette.tags = palette.tags
+        setattr(db_palette, 'tags', palette.tags)
     
     db.commit()
     db.refresh(db_palette)
@@ -207,7 +207,7 @@ def delete_palette(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Palette not found"
         )
-    if db_palette.user_id != current_user.id:
+    if bool(db_palette.user_id != current_user.id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to delete this palette"

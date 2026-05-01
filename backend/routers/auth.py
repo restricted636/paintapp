@@ -107,7 +107,7 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         )
     
     # Verify password
-    if not verify_password(user.password, db_user.password_hash):
+    if not verify_password(user.password, str(db_user.password_hash)):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
